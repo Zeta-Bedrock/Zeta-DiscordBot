@@ -1,6 +1,7 @@
-package command
+package fun
 
 import (
+	"discord-bot/command/context"
 	"fmt"
 	"github.com/Goscord/goscord/goscord/discord"
 )
@@ -23,7 +24,7 @@ func (c *PingCommand) Options() []*discord.ApplicationCommandOption {
 	return make([]*discord.ApplicationCommandOption, 0)
 }
 
-func (c *PingCommand) Execute(ctx *Context) bool {
+func (c *PingCommand) Execute(ctx *context.Context) bool {
 	_, _ = ctx.Client.Interaction.CreateFollowupMessage(ctx.Client.Me().Id, ctx.Interaction.Token, fmt.Sprintf("Pong! 🏓 (%dms)", ctx.Client.Latency().Milliseconds()))
 
 	return true

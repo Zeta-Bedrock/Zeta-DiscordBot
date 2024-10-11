@@ -1,6 +1,9 @@
 package command
 
 import (
+	"discord-bot/command/context"
+	"discord-bot/command/fun"
+	"discord-bot/command/moderation"
 	"fmt"
 	"github.com/Goscord/goscord/goscord/discord"
 	"github.com/Goscord/goscord/goscord/gateway"
@@ -8,18 +11,19 @@ import (
 
 type Manager struct {
 	client   *gateway.Session
-	commands map[string]Command
+	commands map[string]context.Command
 }
 
 func NewCommandManager(client *gateway.Session) *Manager {
 	return &Manager{
 		client:   client,
-		commands: make(map[string]Command),
+		commands: make(map[string]context.Command),
 	}
 }
 
 func (mgr *Manager) Init() {
-	mgr.Register(new(PingCommand))
+	mgr.Register(new(fun.PingCommand))
+	mgr.Register(new(moderation.KickCommand))
 }
 
 func (mgr *Manager) Handler(client *gateway.Session) func(*discord.Interaction) {
@@ -41,12 +45,12 @@ func (mgr *Manager) Handler(client *gateway.Session) func(*discord.Interaction) 
 		if cmd != nil {
 			_ = client.Interaction.DeferResponse(interaction.Id, interaction.Token, true)
 
-			_ = cmd.Execute(&Context{Client: client, Interaction: interaction, CmdManager: mgr})
+			_ = cmd.Execute(&context.Context{Client: client, Interaction: interaction, CmdManager: mgr})
 		}
 	}
 }
 
-func (mgr *Manager) Get(name string) Command {
+func (mgr *Manager) Get(name string) context.Command {
 	if cmd, ok := mgr.commands[name]; ok {
 		return cmd
 	}
@@ -54,7 +58,7 @@ func (mgr *Manager) Get(name string) Command {
 	return nil
 }
 
-func (mgr *Manager) Register(cmd Command) {
+func (mgr *Manager) Register(cmd context.Command) {
 	appCmd := &discord.ApplicationCommand{
 		Name:        cmd.Name(),
 		Type:        discord.ApplicationCommandChat,
